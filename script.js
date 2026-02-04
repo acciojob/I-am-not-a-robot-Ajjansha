@@ -1,55 +1,35 @@
-//your code here
 const container = document.getElementById("container");
 const resetBtn = document.getElementById("reset");
 const verifyBtn = document.getElementById("verify");
 const para = document.getElementById("para");
 
-let selectedImages = [];
+let selected = [];
 
-/* Image classes */
-const images = ["img1", "img2", "img3", "img4", "img5"];
-
-/* Shuffle function */
-function shuffle(arr) {
-  return arr.sort(() => Math.random() - 0.5);
+function shuffle(nodes) {
+  for (let i = nodes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    container.appendChild(nodes[j]);
+  }
 }
 
-/* Load images */
-function loadImages() {
-  container.innerHTML = "";
-  selectedImages = [];
+/* Duplicate one random image */
+function setupImages() {
+  selected = [];
   para.textContent = "";
   resetBtn.style.display = "none";
   verifyBtn.style.display = "none";
 
-  // pick random image to duplicate
-  const duplicate = images[Math.floor(Math.random() * images.length)];
-  const imgArray = shuffle([...images, duplicate]);
+  // remove old duplicate if exists
+  const imgs = Array.from(container.children);
+  if (imgs.length === 6) imgs.pop().remove();
 
-  imgArray.forEach(cls => {
-    const img = document.createElement("img");
-    img.classList.add(cls);
+  const randomIndex = Math.floor(Math.random() * imgs.length);
+  const clone = imgs[randomIndex].cloneNode(true);
+  container.appendChild(clone);
 
-    img.addEventListener("click", () => handleClick(img, cls));
-    container.appendChild(img);
-  });
+  shuffle(Array.from(container.children));
 }
 
-/* Handle image click */
-function handleClick(img, cls) {
-  if (selectedImages.length === 2) return;
-  if (selectedImages.some(item => item.img === img)) return;
-
-  img.classList.add("selected");
-  selectedImages.push({ img, cls });
-
-  resetBtn.style.display = "inline-block";
-
-  if (selectedImages.length === 2) {
-    verifyBtn.style.display = "inline-block";
-  }
-}
-
-/* Verify */
-verifyBtn.addEventListener("click", () => {
-  ve
+/* Image click */
+container.addEventListener("click", (e) => {
+  if (
