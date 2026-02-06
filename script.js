@@ -1,35 +1,77 @@
-const container = document.getElementById("container");
+const imageContainer = document.getElementById("image-container");
 const resetBtn = document.getElementById("reset");
 const verifyBtn = document.getElementById("verify");
-const para = document.getElementById("para");
+const message = document.getElementById("h");
+const result = document.getElementById("para");
 
-let selected = [];
+let selectedImages = [];
 
-function shuffle(nodes) {
-  for (let i = nodes.length - 1; i > 0; i--) {
+/* Base images */
+const images = [
+  "https://via.placeholder.com/120?text=1",
+  "https://via.placeholder.com/120?text=2",
+  "https://via.placeholder.com/120?text=3",
+  "https://via.placeholder.com/120?text=4",
+  "https://via.placeholder.com/120?text=5"
+];
+
+/* Setup images */
+function loadImages() {
+  imageContainer.innerHTML = "";
+  selectedImages = [];
+  result.textContent = "";
+  resetBtn.style.display = "none";
+  verifyBtn.style.display = "none";
+  message.textContent = "Please click on the identical tiles to verify that you are not a robot.";
+
+  const duplicate = images[Math.floor(Math.random() * images.length)];
+  const allImages = [...images, duplicate];
+
+  shuffle(allImages);
+
+  allImages.forEach(src => {
+    const img = document.createElement("img");
+    img.src = src;
+    img.addEventListener("click", () => handleClick(img));
+    imageContainer.appendChild(img);
+  });
+}
+
+/* Shuffle array */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    container.appendChild(nodes[j]);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
 }
 
-/* Duplicate one random image */
-function setupImages() {
-  selected = [];
-  para.textContent = "";
-  resetBtn.style.display = "none";
-  verifyBtn.style.display = "none";
+/* Handle image click */
+function handleClick(img) {
+  if (selectedImages.includes(img) || selectedImages.length === 2) return;
 
-  // remove old duplicate if exists
-  const imgs = Array.from(container.children);
-  if (imgs.length === 6) imgs.pop().remove();
+  img.classList.add("selected");
+  selectedImages.push(img);
+  resetBtn.style.display = "inline-block";
 
-  const randomIndex = Math.floor(Math.random() * imgs.length);
-  const clone = imgs[randomIndex].cloneNode(true);
-  container.appendChild(clone);
-
-  shuffle(Array.from(container.children));
+  if (selectedImages.length === 2) {
+    verifyBtn.style.display = "inline-block";
+  }
 }
 
-/* Image click */
-container.addEventListener("click", (e) => {
-  if (
+/* Reset */
+resetBtn.addEventListener("click", loadImages);
+
+/* Verify */
+verifyBtn.addEventListener("click", () => {
+  verifyBtn.style.display = "none";
+
+  if (selectedImages[0].src === selectedImages[1].src) {
+    result.textContent = "You are a human. Congratulations!";
+  } else {
+    result.textContent = "We can't verify you as a human. You selected the non-identical tiles.";
+  }
+});
+
+/* Initial load */
+loadImages();
+
